@@ -9,9 +9,11 @@ Preliminary work for real-time rail grade-crossing anomaly detection using compu
 - `notebooks/` — Detection pipeline notebooks
 - `scripts/` — Python helper scripts
 
-## Dataset
+## Dataset & Resources
 
-Preliminary dataset(s) are available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases).
+- A preliminary railroad crossing dataset (static images with labels, formatted for YOLOv8) is available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.0)
+- Test videos for the detection pipeline are also available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.1)
+- Currently exploring additional public datasets for vehicle-focused fine-tuning
 
 ## Model
 
