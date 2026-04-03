@@ -23,7 +23,7 @@ This repo tracks our early-stage research progress. Current priorities:
 - Fine-tune YOLO on vehicle detection (rather than infrastructure objects)
 - Evaluate model generalizability across different crossing videos
 - Source a larger public dataset
-- Create a Python download script for the dataset
+- Create a Python download script for the dataset - (FT)
 
 ## Contributors
 
