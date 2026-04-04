@@ -10,11 +10,11 @@ Preliminary work for real-time rail grade-crossing anomaly detection using compu
 - `scripts/` — Python helper scripts
 
 ## Dataset & Resources
-##   Railroad crossings (object detection) > Railroad v3 - 200 images with new labels and augmentation
+  ## Railroad crossings (object detection) > Railroad v3 - 200 images with new labels and augmentation
 - A preliminary railroad crossing dataset (static images with labels, formatted for YOLOv8) is available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.0)
 
 
-## Video dataset
+  ## Video dataset
 - Test videos for the detection pipeline are also available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.1)
 - Currently exploring additional public datasets for vehicle-focused fine-tuning
 
