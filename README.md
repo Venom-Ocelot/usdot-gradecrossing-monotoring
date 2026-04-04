@@ -12,8 +12,7 @@ Preliminary work for real-time rail grade-crossing anomaly detection using compu
 ## Dataset & Resources
   ## Railroad crossings (object detection) > Railroad v3 - 200 images with new labels and augmentation
   - A preliminary railroad crossing dataset (static images with labels, formatted for YOLOv8) is available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.0)
-  - Link to dataset: https://universe.roboflow.com/obstacle-detection/railroad-crossings-object-detection
-  - 
+  - Link to dataset: https://universe.roboflow.com/obstacle-detection/railroad-crossings-object-detection (Under "Dataset" tab, choose "Railroad V3")
 
 ## Video dataset
 - Test videos for the detection pipeline are also available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.1)
