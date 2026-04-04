@@ -16,6 +16,7 @@ Preliminary work for real-time rail grade-crossing anomaly detection using compu
 
 ## Video dataset
 - Test videos for the detection pipeline are also available on the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) (v1.1)
+## Future Data exploration
 - Currently exploring additional public datasets for vehicle-focused fine-tuning
 
 ## Model
