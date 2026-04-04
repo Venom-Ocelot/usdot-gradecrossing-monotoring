@@ -8,6 +8,7 @@ Preliminary work for real-time rail grade-crossing anomaly detection using compu
 - `fine-tuning/` — Initial fine-tuning results (infrastructure detection) and ZOI implementation
 - `notebooks/` — Detection pipeline notebooks
 - `scripts/` — Python helper scripts
+- - `models/` — Fine-tuned models (in progress)
 
 ## Dataset & Resources
 
