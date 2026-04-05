@@ -105,17 +105,27 @@ val: ../valid/images      ← WRONG
 test: ../test/images      ← WRONG
 ```
 
-Fix it by adding a `path:` line at the top and changing the three paths:
+Fix it by adding a `path:` line at the top and changing the three paths.
+First, get your repo root path by running this from the project root:
+```bash
+pwd
+```
+
+Then update `data/data.yaml`:
 ```yaml
-path: /Users/davidsanchez/Desktop/usdot-gradecrossing-monotoring/data
+path: /YOUR/ABSOLUTE/PATH/TO/usdot-gradecrossing-monotoring/data
 train: train/images
 val: valid/images
 test: test/images
 ```
 
+Replace `/YOUR/ABSOLUTE/PATH/TO/usdot-gradecrossing-monotoring` with the output of `pwd` above.
+
 > Why this happens: Roboflow writes paths assuming the yaml is one level above
 > the train/valid/test folders. Since we extract everything into data/, the
 > relative paths break. Adding the absolute `path:` fixes it permanently.
+> The `path:` value must be absolute — it will differ on every machine, so
+> **do not commit data.yaml** (it is already gitignored).
 
 Also note how many classes the dataset has — you'll need this for your log:
 ```yaml
@@ -129,9 +139,15 @@ names: ['Car', 'Jeep', 'Motorcycle', 'Tricycle', 'Truck', 'Van']
 
 From the project root, run:
 ```bash
-cd /Users/davidsanchez/Desktop/usdot-gradecrossing-monotoring
-/Users/davidsanchez/yoloenv/bin/yolo train cfg=fine-tuning/configs/vehicle_finetune.yaml
+cd /path/to/usdot-gradecrossing-monotoring
+yolo train cfg=fine-tuning/configs/vehicle_finetune.yaml
 ```
+
+> If `yolo` is not on your PATH, activate your virtual environment first:
+> ```bash
+> source /path/to/your/venv/bin/activate
+> ```
+> Then run the `yolo train` command above.
 
 > **Hardware note:** The config auto-detects the best available device.
 > No changes needed regardless of who is running it or what machine they're on:
