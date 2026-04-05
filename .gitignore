@@ -10,3 +10,6 @@ data/*
 models/*
 !models/.gitkeep
 
+# YOLO training output — large files, never committed
+runs/
+

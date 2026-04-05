@@ -11,28 +11,32 @@
 #        YOLO('yolo11n.pt').train(cfg='fine-tuning/configs/vehicle_finetune.yaml')
 
 # Base model — downloads automatically from Ultralytics if not present
-model: yolo11n.pt
+model: models/yolo11n.pt
 
 # Dataset config — provided in the release zip, placed in data/
 data: data/data.yaml
 
 # Training hyperparameters
 epochs: 50
-batch: 16
+batch: 16          # reduce to 8 or 4 if you get out-of-memory errors on CPU
 imgsz: 640
 lr0: 0.01          # initial learning rate
 lrf: 0.01          # final learning rate (fraction of lr0)
 patience: 10       # early stopping patience (epochs without improvement)
 
-# Hardware
-device: 0          # GPU index; use 'cpu' if no GPU available
+# Hardware — auto-detects the best available device for whoever is running this:
+#   NVIDIA GPU (CUDA)  → fastest, typical on Linux/Windows servers
+#   Apple Silicon MPS  → fast, Mac M-series chips
+#   CPU only           → slowest but works on any machine
+# Override manually if needed: device: 0 (CUDA), device: mps, device: cpu
+device: ''
 
 # Output — saved to models/ (gitignored)
-project: models
+project: models/runs
 name: vehicle_finetune_v1
 save: true
 save_period: -1    # only save best and last checkpoints
 
-# Target classes (defined in data/data.yaml)
-# In scope:     car, truck, pedestrian
-# Out of scope: signs, gate arms, infrastructure
+# Target classes (defined in data/data.yaml — CCTV_Vehicles v7, Roboflow)
+# In scope:     Car, Jeep, Motorcycle, Tricycle, Truck, Van
+# Out of scope: pedestrian (not in this dataset), signs, gate arms, infrastructure
