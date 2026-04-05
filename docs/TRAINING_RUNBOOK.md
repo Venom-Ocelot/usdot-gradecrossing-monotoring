@@ -1,6 +1,51 @@
 # Training Runbook
 ## How to add a new dataset and fine-tune the YOLO model
 
+---
+
+## Project Scope — Read This First
+
+This project has two distinct phases. Understanding which phase you are in
+determines what tools you use and what you should be doing.
+
+### Phase 1 — Training (where we are now)
+- **Goal:** build a YOLO model that reliably detects vehicles in CCTV footage
+- **Tools:** terminal only — `yolo train` command
+- **What you do:** find datasets → extract → train → log results → repeat
+- **Jupyter notebook:** not used at all during this phase
+- **Done when:** mAP50 is consistently strong across multiple datasets/runs
+
+### Phase 2 — Validation (next phase)
+- **Goal:** confirm the trained model actually works on real crossing video
+- **Tools:** Jupyter notebook (Cell 12 — the full pipeline)
+- **What you do:** point `VIDEO_PATH` at a real crossing video, point `MODEL_PATH`
+  at your best `best.pt`, run Cell 12, and observe
+- **What you're looking for:** does the pipeline correctly detect stuck vehicles
+  and debris? Does the alarm trigger at the right time?
+- **Done when:** the pipeline performs correctly on real footage end-to-end
+
+### The connection between phases
+```
+Phase 1 (training)     →    produces best.pt
+Phase 2 (validation)   →    plugs best.pt into the notebook and tests on real video
+```
+If Phase 2 reveals the model is still missing things, you go back to Phase 1,
+find better data, retrain, and test again. This loop continues until the
+pipeline works reliably on real crossing footage.
+
+### What each component does
+```
+Dataset images      →  teach YOLO what vehicles look like (training only)
+best.pt             →  the model's learned knowledge, used by the notebook
+Video file          →  what the notebook actually watches and analyzes
+RANSAC + Opt. Flow  →  keeps the ZOI locked to the tracks (notebook, Cell 12)
+MOG2                →  detects unknown objects/debris (notebook, Cell 12)
+YOLO                →  detects known vehicles (notebook, Cell 12, uses best.pt)
+Safety logic        →  decides when to trigger an alarm (notebook, Cell 12)
+```
+
+---
+
 Follow these steps every time you bring in a new dataset and retrain.
 Check off each step as you go and fill in the log at the bottom.
 
@@ -188,12 +233,24 @@ models/runs/
 
 ## RUN LOG
 
-Fill this in every time you complete a training run. the scope is essentially:
+Fill this in every time you complete a training run.
 
-Run 001  mAP50: 0.61  (generic CCTV (no crossing) dataset, baseline)
+The goal of this log is twofold:
+1. Track whether each new dataset actually improved the model (compare mAP50)
+2. Build a record you can reference when writing the project report
+
+What good progress looks like over time:
+```
+Run 001  mAP50: 0.61  (generic CCTV dataset — baseline, no crossing footage)
 Run 002  mAP50: 0.74  (crossing-specific data added — clear improvement)
-Run 003  mAP50: 0.73  (different dataset, no improvement — skip it)
-Run 004  mAP50: 0.81  (your own labeled footage — big jump)
+Run 003  mAP50: 0.73  (different dataset, no gain — not worth chaining)
+Run 004  mAP50: 0.81  (your own labeled footage — biggest jump, most valuable)
+         ↓
+         Ready for Phase 2 — test on real crossing video in the notebook
+```
+
+When mAP50 stops improving across multiple runs, that is your signal to move
+to Phase 2 and validate in the Jupyter notebook with a real crossing video.
 
 ---
 
