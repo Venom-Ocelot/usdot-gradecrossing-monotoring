@@ -1,5 +1,12 @@
 *.mov
 *.mp4
+*.pt
 .DS_Store
 .ipynb_checkpoints/
+
+# Local data and model weights — never committed, download from Releases
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
 
