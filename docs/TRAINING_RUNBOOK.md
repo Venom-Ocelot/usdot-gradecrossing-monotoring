@@ -23,6 +23,18 @@ determines what tools you use and what you should be doing.
 - **What you're looking for:** does the pipeline correctly detect stuck vehicles
   and debris? Does the alarm trigger at the right time?
 - **Done when:** the pipeline performs correctly on real footage end-to-end
+- **Key signals to watch for when something fails:**
+
+  | What you see in the output | What it means | What to do |
+  |---|---|---|
+  | Status stays CLEAR even with a vehicle on tracks | YOLO missed the vehicle — low confidence or wrong class | Find crossing-specific detection data, chain a new run |
+  | ALARM triggers immediately on every frame | MOG2 is treating the vehicle as debris instead of excluding it | YOLO confidence too low to build exclusion mask — same fix |
+  | ZOI drifts off the tracks over time | Optical flow lost its reference points | Camera motion issue — not a model problem, fix in `pipeline_helpers.py` |
+  | Vehicle detected but alarm never fires | Vehicle timer threshold too high for this video's scenario | Adjust `VEHICLE_THRESHOLD` in Cell 12 |
+  | Alarm fires correctly but too late | Timer thresholds need tuning for this specific crossing | Adjust `TIME_THRESHOLD` / `VEHICLE_THRESHOLD` |
+
+  The first two failures point back to Phase 1 (more training data).
+  The last three are pipeline tuning issues, not model issues.
 
 ### The connection between phases
 ```
@@ -236,7 +248,7 @@ learned as much as it can from this dataset.
 
 YOLO saves two weight files:
 ```
-runs/detect/models/vehicle_finetune_v1/weights/
+models/runs/vehicle_finetune_v1/weights/
     best.pt   ← highest val mAP checkpoint — USE THIS ONE
     last.pt   ← final epoch checkpoint — ignore unless best.pt is missing
 ```
@@ -244,12 +256,49 @@ runs/detect/models/vehicle_finetune_v1/weights/
 **Do not rename or move best.pt.** Leave it where YOLO saved it.
 You will reference it by path in the next run and in the notebook.
 
+**Backup best.pt to GitHub Releases immediately after each run.**
+The `models/` folder is gitignored — weights are never committed. If you delete
+the folder, do a `git clean`, or clone fresh on another machine, the file is
+gone. To preserve it:
+1. Go to the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases)
+2. Create a new release (e.g. `run-001-best`) or draft one
+3. Attach `best.pt` as a release asset
+4. Note the download URL in your Run Log below
+
+This is the same pattern already used for datasets in this repo.
+
 ---
 
 ## STEP 7 — Decide what to do next
 
 This is the most important decision in the whole process.
-Compare this run's mAP50 to the previous run and ask three questions:
+Compare this run's mAP50 to the previous run and ask three questions.
+
+---
+
+> ### ⚠️ Read this before chaining runs
+>
+> **Catastrophic forgetting:** When you fine-tune on a new dataset, the model
+> can partially forget what it learned from the previous one. Adding a new
+> dataset does not guarantee improvement — it can lower real-world performance
+> even if the new mAP50 number looks fine on paper, because mAP50 only measures
+> accuracy on the *new* dataset's test images, not on everything the model
+> previously knew.
+>
+> **Training blind:** A high mAP50 on training data does not mean the model
+> works on real crossing footage. You can chain run after run and never know
+> what the model actually misses on a real camera until you test it. The right
+> strategy is:
+> 1. Validate on real crossing video first (Phase 2, Cell 12 in the notebook)
+> 2. Identify exactly what the model fails on (night? partial occlusion? gates?)
+> 3. Find datasets that specifically target those failures
+> 4. Chain only from a known-good best.pt into that targeted data
+>
+> This means **Phase 2 is not the finish line — it is part of the loop.**
+> You may go back and forth between Phase 1 and Phase 2 several times before
+> the pipeline works reliably on real footage.
+
+---
 
 **1. Did mAP50 improve?**
 - Yes → this dataset helped. Consider chaining from this best.pt next run.
@@ -284,7 +333,7 @@ model: models/yolo11n.pt
 name:  vehicle_finetune_v1
 
 # After (Run 002 — chained, builds on Run 001)
-model: runs/detect/models/vehicle_finetune_v1/weights/best.pt
+model: models/runs/vehicle_finetune_v1/weights/best.pt
 name:  vehicle_finetune_v2
 ```
 
@@ -296,12 +345,12 @@ yolo train cfg=fine-tuning/configs/vehicle_finetune.yaml
 YOLO loads best.pt instead of the base weights and starts learning from where
 Run 001 left off. Everything else stays the same.
 
-Your runs/detect/ folder becomes a history you can always roll back to:
+Your models/runs/ folder becomes a history you can always roll back to:
 ```
-runs/detect/
-├── models/vehicle_finetune_v1/weights/best.pt  ← Run 001
-├── models/vehicle_finetune_v2/weights/best.pt  ← Run 002, chained from v1
-└── models/vehicle_finetune_v3/weights/best.pt  ← Run 003, chained from v2
+models/runs/
+├── vehicle_finetune_v1/weights/best.pt  ← Run 001
+├── vehicle_finetune_v2/weights/best.pt  ← Run 002, chained from v1
+└── vehicle_finetune_v3/weights/best.pt  ← Run 003, chained from v2
 ```
 
 If Run 003 mAP50 drops below Run 002, point `model:` back at v2's best.pt.
@@ -314,7 +363,7 @@ That version is your new starting point.
 
 At that point, update Cell 1b in the notebook:
 ```python
-MODEL_PATH = "runs/detect/models/vehicle_finetune_v2/weights/best.pt"
+MODEL_PATH = "models/runs/vehicle_finetune_v2/weights/best.pt"
 ```
 And move to Phase 2 validation on a real crossing video.
 
@@ -354,7 +403,7 @@ Run 004  mAP50: 0.81  (your own labeled footage — biggest jump, most valuable)
 | Final dfl_loss | 0.9563 |
 | Final mAP50 | 0.9156 |
 | Stopped early? | Yes — no improvement after epoch 14 |
-| Weights saved to | runs/detect/models/vehicle_finetune_v1/weights/best.pt |
+| Weights saved to | models/runs/vehicle_finetune_v1/weights/best.pt |
 | Decision for next run | Chain from this best.pt — excellent result, add crossing-specific data |
 | Notes | Excellent result for a first run. Generic CCTV overhead vehicle dataset, no crossing-specific footage. High mAP50 likely because dataset angle matches crossing camera perspective well. |
 

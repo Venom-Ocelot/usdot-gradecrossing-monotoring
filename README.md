@@ -32,6 +32,10 @@ Previous test videos and a preliminary crossing dataset are also available on th
 
 This project uses YOLOv11 Nano (`yolo11n.pt`). Base weights download automatically when running the notebook, or can be downloaded from [Ultralytics](https://docs.ultralytics.com).
 
+Fine-tuned weights (`best.pt`) are never committed to git — they are uploaded as assets to the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) after each training run so they are preserved and accessible without bloating the repository.
+
+> **Training strategy note:** A high mAP50 on training data does not mean the model works on real crossing footage. The recommended approach is to validate on real video first (Phase 2, notebook Cell 12), identify what actually fails, and only then chain additional training runs targeting those specific failures. See `docs/TRAINING_RUNBOOK.md` for the full strategy and failure signal guide.
+
 ## Status
 
 This repo tracks our early-stage research progress. Current priorities:
