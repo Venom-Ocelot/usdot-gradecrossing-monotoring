@@ -33,8 +33,6 @@ results = model.train(data="/content/drive/MyDrive/Chuprov_Lab_Stuff/railroad_cr
                       patience = 50,
                       cfg = '/content/runs/detect/tune2/best_hyperparameters.yaml' )
 
-from google.colab import drive
-drive.mount('/content/drive')
 
 #performing model validation
 metrics = model.val(data="/content/drive/MyDrive/Chuprov_Lab_Stuff/railroad_crossing_dataset/data.yaml",split = "test")
