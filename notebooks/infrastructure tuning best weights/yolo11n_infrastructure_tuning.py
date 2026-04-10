@@ -17,6 +17,7 @@ from ultralytics import YOLO
 
 model = YOLO('yolo11n.pt')
 
+#performing hyperparameter tuning to find the best weights for the training portion
 model.tune(
     data="/content/drive/MyDrive/Chuprov_Lab_Stuff/railroad_crossing_dataset/data.yml", # Path to your dataset configuration
     epochs=30,                  # How many epochs to run per test (keep this short, 30-50)
@@ -27,12 +28,16 @@ model.tune(
     val=False                   # Only validate on the final epoch of each iteration
 )
 
+#Now, this is where I train my model on the weights the previous step deemed good. 
+#A good analogy for hyperparameter tuning would be like finding the best most efficient way a student can study for a test.
+#Now that I found the best "way to study" I can now start studying (Train)
 # Train the model on a railroad crossing dataset at 300 epochs
 results = model.train(data="/content/drive/MyDrive/Chuprov_Lab_Stuff/railroad_crossing_dataset/data.yaml", epochs=300,
                       imgsz=640,
                       patience = 50,
                       cfg = '/content/runs/detect/tune2/best_hyperparameters.yaml' )
 
+#Now, I take my exam and I will see how I performed
 #performing model validation
 metrics = model.val(data="/content/drive/MyDrive/Chuprov_Lab_Stuff/railroad_crossing_dataset/data.yaml",split = "test")
 
@@ -43,8 +48,6 @@ results = model.predict(
     project="/content/drive/MyDrive/Chuprov_Lab_Stuff/model_predictions", # The main output folder
     name="test_run"                                                       # The specific sub-folder for this batch
 )
-
-# You no longer need the for loop with result.show() if you are just saving them!
 #displaying image with BBox and confidence score
 for result in results[:10]:
   result.show()
