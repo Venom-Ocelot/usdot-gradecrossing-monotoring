@@ -27,7 +27,7 @@ model.tune(
     val=False                   # Only validate on the final epoch of each iteration
 )
 
-#Now, this is where I train my model on the weights the previous step deemed good. 
+#Now, this is where I train my model on the parameters the previous step deemed good. 
 #A good analogy for hyperparameter tuning would be like finding the best most efficient way a student can study for a test.
 #Now that I found the best "way to study" I can now start studying (Train)
 # Train the model on a railroad crossing dataset at 300 epochs
