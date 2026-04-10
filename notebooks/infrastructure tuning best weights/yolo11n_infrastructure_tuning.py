@@ -12,7 +12,6 @@ from google.colab import drive
 drive.mount('/content/drive')
 
 from ultralytics import YOLO
-#import torch
 #loading a pretrained yolo11n model
 
 model = YOLO('yolo11n.pt')
