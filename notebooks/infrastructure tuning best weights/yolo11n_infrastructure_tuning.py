@@ -16,7 +16,7 @@ from ultralytics import YOLO
 
 model = YOLO('yolo11n.pt')
 
-#performing hyperparameter tuning to find the best weights for the training portion
+#performing hyperparameter tuning to find the best hyperparameters for the training portion
 model.tune(
     data="/content/drive/MyDrive/Chuprov_Lab_Stuff/railroad_crossing_dataset/data.yml", # Path to your dataset configuration
     epochs=30,                  # How many epochs to run per test (keep this short, 30-50)
