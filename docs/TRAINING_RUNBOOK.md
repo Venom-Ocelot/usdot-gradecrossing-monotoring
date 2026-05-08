@@ -46,6 +46,7 @@ find better data, retrain, and test again. This loop continues until the
 pipeline works reliably on real crossing footage.
 
 ### What each component does
+
 ```
 Dataset images      →  teach YOLO what vehicles look like (training only)
 best.pt             →  the model's learned knowledge, used by the notebook

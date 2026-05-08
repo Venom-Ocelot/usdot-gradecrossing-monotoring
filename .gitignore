@@ -4,11 +4,18 @@
 .DS_Store
 .ipynb_checkpoints/
 
+# Claude Code local config — never committed
+.claude/
+*.code-workspace
+
 # Local data and model weights — never committed, download from Releases
 data/*
 !data/.gitkeep
 models/*
 !models/.gitkeep
+
+# Video files — large, never committed
+videos/
 
 # YOLO training output — large files, never committed
 runs/
