@@ -1,5 +1,6 @@
 *.mov
 *.mp4
+*.avi
 *.pt
 .DS_Store
 .ipynb_checkpoints/
@@ -8,15 +9,13 @@
 .claude/
 *.code-workspace
 
-# Local data and model weights — never committed, download from Releases
-data/*
-!data/.gitkeep
-models/*
-!models/.gitkeep
+# Trained weights — drop best.pt from Colab into weights/, never committed
+weights/*
+!weights/.gitkeep
 
-# Video files — large, never committed
-videos/
+# All video files live in data/cache/ — large, never committed
+data/cache/
 
-# YOLO training output — large files, never committed
-runs/
+# Pipeline run outputs — never committed
+outputs/
 

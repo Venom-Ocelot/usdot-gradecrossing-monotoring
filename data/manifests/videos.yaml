@@ -1,0 +1,6 @@
+videos:
+  - id: crossing_001
+    name: Sample railroad crossing video
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1_nYQuwJe2Kpp-DsxT0TjQs1VG4ZPE7pa/view?usp=drive_link
+    local_cache_path: data/cache/crossing_001.mp4

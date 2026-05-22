@@ -1,46 +1,58 @@
 # USDOT Grade Crossing Monitoring
 
-Preliminary work for real-time rail grade-crossing anomaly detection using computer vision (YOLOv8/v11, MOG2 background subtraction).
+Real-time rail grade-crossing anomaly detection using computer vision (YOLOv11, MOG2 background subtraction).
 
 ## Overview
 
-This system focuses on improving safety at railroad grade crossings by monitoring video feeds and identifying hazards in real time, without relying on specialized sensors. Its goal is to detect situations where a vehicle becomes stuck or when debris enters the crossing, allowing alerts to be triggered and events to be recorded for later analysis.
+This system improves safety at railroad grade crossings by monitoring video feeds and identifying hazards in real time, without relying on specialized sensors. It detects situations where a vehicle becomes stuck or debris enters the crossing, triggering alerts and recording events for later analysis.
 
-At a high level, the system maintains a consistent view of the crossing by stabilizing a Zone of Interest (ZOI), even when the camera shifts or becomes partially obstructed. Within a specific region, it will identify known objects such as vehicles using object detection, while also monitoring for unknown objects through background-based anomaly detection. By observing how these detections behave over time, the system distinguishes between normal movement and unsafe conditions, such as a vehicle remaining stationary for too long within the crossing.
+The system stabilizes a Zone of Interest (ZOI) across the crossing even when the camera shifts or becomes partially obstructed. Within that region it identifies vehicles using YOLO object detection and monitors for unknown objects through background-based anomaly detection. By observing detections over time it distinguishes normal movement from unsafe conditions — such as a vehicle remaining stationary too long inside the crossing.
 
 ## Project Structure
 
-- `notebooks/` — Detection pipeline notebook and helper scripts
-- `scripts/` — Utility scripts
-- `fine-tuning/configs/` — Committed training configs (`vehicle_finetune.yaml`)
-- `docs/` — Reference documentation
-- `data/` — Local dataset (gitignored — download from Releases)
-- `models/` — Model weights (gitignored — auto-downloaded or fine-tuned locally)
+```
+├── pipeline/          # Core Python package (detection, safety logic, visualization)
+├── notebooks/         # Interactive pipeline notebook + Jupyter kernel startup script
+├── weights/           # Drop best.pt exports from Colab here (gitignored)
+├── videos/            # Local test videos (gitignored)
+├── docs/              # Reference documentation
+├── run_pipeline.py    # CLI entry point
+├── pyproject.toml     # Project metadata and runtime dependencies
+├── requirements.txt   # Editable install (references pyproject.toml)
+└── requirements-dev.txt  # Dev-only deps (Jupyter, ipykernel)
+```
 
-## Dataset & Resources
+## Setup
 
-The vehicle detection dataset is distributed as a pre-structured YOLO-formatted zip via the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases). To set up locally:
+```bash
+pip install -r requirements-dev.txt
+```
 
-1. Download the dataset zip from the Releases tab
-2. Extract the contents into the `data/` folder at the repo root
+This installs the project in editable mode along with all runtime and dev dependencies. The VS Code workspace will also run this automatically on folder open.
 
-The `data/` folder is gitignored and never committed — the release zip provides the predefined YOLO structure.
+## Model Weights
 
-Previous test videos and a preliminary crossing dataset are also available on the Releases tab (v1.0, v1.1).
+Model training is done in Google Colab. After a training run, download `best.pt` and drop it into the `weights/` folder — the pipeline reads from there automatically.
 
-## Model
+`weights/` is gitignored and never committed.
 
-This project uses YOLOv11 Nano (`yolo11n.pt`). Base weights download automatically when running the notebook, or can be downloaded from [Ultralytics](https://docs.ultralytics.com).
+## Running the Pipeline
 
-Fine-tuned weights (`best.pt`) are never committed to git — they are uploaded as assets to the [Releases tab](https://github.com/ruby-gonzalez/usdot-gradecrossing-monotoring/releases) after each training run so they are preserved and accessible without bloating the repository.
+**Notebook:**
+Open `notebooks/pipeline.ipynb`. The kernel startup script loads all imports automatically.
 
-> **Training strategy note:** A high mAP50 on training data does not mean the model works on real crossing footage. The recommended approach is to validate on real video first (Phase 2, notebook Cell 12), identify what actually fails, and only then chain additional training runs targeting those specific failures. See `docs/TRAINING_RUNBOOK.md` for the full strategy and failure signal guide.
+**CLI:**
+```bash
+python run_pipeline.py --video videos/<file>.mov
+```
+
+See `python run_pipeline.py --help` for all options.
 
 ## Status
 
-This repo tracks our early-stage research progress. Current priorities:
-- Fine-tune YOLO on vehicle detection
-- Evaluate model generalibility across different crossing videos
+Active research project. Current priorities:
+- Validate detection performance across different crossing camera angles
+- Improve ZOI stabilization under heavy camera movement
 
 ## Contributors
 

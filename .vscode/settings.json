@@ -1,0 +1,10 @@
+{
+  // Run this script automatically every time a Jupyter kernel starts in this workspace.
+  // Handles package checks, sys.path setup, and all pipeline imports — no manual Cell 0/1 needed.
+  "jupyter.runStartupCommands": [
+    "%run notebooks/startup.py"
+  ],
+
+  // Kernel CWD = workspace root so the %run path above resolves correctly.
+  "jupyter.notebookFileRoot": "${workspaceFolder}"
+}
