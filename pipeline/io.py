@@ -76,10 +76,11 @@ def _download_google_drive(entry: VideoEntry) -> str:
     cache = Path(entry.local_cache_path)
     cache.parent.mkdir(parents=True, exist_ok=True)
     gdown.download(entry.source, str(cache), quiet=False, fuzzy=True)
-    if not cache.exists():
+    if not cache.exists() or cache.stat().st_size < 1024:
         raise RuntimeError(
-            f"gdown did not produce a file at '{cache}' for entry '{entry.id}'. "
-            f"Check that the Google Drive link is publicly accessible."
+            f"gdown download for '{entry.id}' appears incomplete — "
+            f"file missing or smaller than 1 KB at '{cache}'. "
+            f"Delete the file (if it exists) and retry."
         )
     return str(cache)
 
@@ -134,7 +135,7 @@ def create_run(video_id: str, base_dir: str | Path = "outputs/runs") -> RunPaths
     All subdirectories are created immediately so callers can write to them
     without any extra setup.
     """
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
     run_id = f"{video_id}_{timestamp}"
     run_dir = Path(base_dir) / run_id
 

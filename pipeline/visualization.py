@@ -27,6 +27,8 @@ def draw_frame(
 
     # YOLO detections that overlap the ZOI
     for result in yolo_results:
+        if result.boxes is None:
+            continue
         for box in result.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             label = result.names[int(box.cls[0])]

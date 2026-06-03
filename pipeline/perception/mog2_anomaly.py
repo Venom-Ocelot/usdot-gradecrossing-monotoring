@@ -35,10 +35,12 @@ def train_mog2(video_path: str) -> cv2.BackgroundSubtractorMOG2:
 def apply_mog2_mask(frame: np.ndarray, mog2: cv2.BackgroundSubtractorMOG2) -> np.ndarray:
     """Apply MOG2 to a frame and return a cleaned binary foreground mask.
 
+    learningRate=0 freezes the background model that was built by train_mog2(),
+    so inference frames do not further update the model's variance estimates.
     Shadows (value 127) are suppressed, then morphological open/close
     remove noise and fill small holes.
     """
-    fg_mask = mog2.apply(frame)
+    fg_mask = mog2.apply(frame, learningRate=0)
     fg_mask[fg_mask == 127] = 0
     fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN,  _MORPH_KERNEL)
     fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_CLOSE, _MORPH_KERNEL)

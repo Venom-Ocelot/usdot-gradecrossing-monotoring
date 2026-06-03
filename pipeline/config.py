@@ -4,10 +4,12 @@ Pipeline configuration — default values for all tunable parameters.
 Import this module and override individual values before passing to runner.run_pipeline().
 """
 
+import cv2
+
 # ── Video / Model inputs ────────────────────────────────────────────────────
 VIDEO_PATH  = "data/cache/crossing_001.mp4"
 MODEL_PATH  = "weights/best.pt"
-RUN_LABEL   = "run002_finetuned"
+RUN_LABEL   = "crossing_run"
 
 # ── Zone of Interest ────────────────────────────────────────────────────────
 # Four corners of the ZOI polygon with pixel coordinates
@@ -29,7 +31,7 @@ FEATURE_PARAMS = dict(
 LK_PARAMS = dict(
     winSize=(21, 21),
     maxLevel=3,
-    criteria=(0x01 | 0x02, 30, 0.01),  # TERM_CRITERIA_EPS | TERM_CRITERIA_COUNT
+    criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 30, 0.01),  # TERM_CRITERIA_EPS | TERM_CRITERIA_COUNT
 )
 
 # ── MOG2 background subtractor ──────────────────────────────────────────────
@@ -42,5 +44,9 @@ AREA_THRESHOLD    = 5000  # minimum debris pixel area to start the debris timer
 TIME_THRESHOLD    = 3.0   # seconds debris must persist before ALARM
 VEHICLE_THRESHOLD = 3.0   # seconds a vehicle must stay in ZOI before ALARM
 
-# ── Detection stride ────────────────────────────────────────────────────────
-YOLO_STRIDE = 5  # run YOLO every N frames
+# ── Detection stride & confidence ─────────────────────────────────────────
+YOLO_STRIDE = 5     # run YOLO every N frames
+YOLO_CONF   = 0.25  # minimum detection confidence (0–1)
+
+# ── Snapshot capture ────────────────────────────────────────────────────────
+LATE_SNAPSHOT_TIME = 28.0  # seconds into video for the late-run snapshot

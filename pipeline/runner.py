@@ -81,6 +81,11 @@ def run_pipeline(
     if h == 0 or w == 0:
         cap.release()
         raise RuntimeError(f"Could not open video: {video_path}")
+    if fps == 0:
+        cap.release()
+        raise RuntimeError(
+            f"Video reports FPS = 0 (missing or unsupported metadata): {video_path}"
+        )
 
     first_gray   = None
     first_points = None
@@ -168,6 +173,10 @@ def run_pipeline(
             if debris_timer_start is None:
                 debris_timer_start = current_time
             debris_time = current_time - debris_timer_start
+            # Safety latch: once any alarm has been triggered, clamp debris time
+            # so a transient background-subtraction drop cannot downgrade ALARM → CLEAR.
+            if alarm_first_triggered is not None:
+                debris_time = max(debris_time, time_threshold)
         else:
             debris_timer_start = None
             debris_time = 0.0
@@ -196,14 +205,14 @@ def run_pipeline(
             if "initial" not in _event_captured and frame_count == 1:
                 snapshots["t=0s — CLEAR"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
                 _event_captured.add("initial")
-            if "warning" not in _event_captured and abs(current_time - 7.0) < (1 / fps) + 0.1:
-                snapshots[f"t=7s — WARNING (vehicle in ZOI)"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+            if "warning" not in _event_captured and status_text == "WARNING":
+                snapshots[f"t={current_time:.1f}s — WARNING (vehicle in ZOI)"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
                 _event_captured.add("warning")
             if "alarm" not in _event_captured and status_text == "ALARM":
                 snapshots[f"t={current_time:.1f}s — ALARM (threshold crossed)"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
                 _event_captured.add("alarm")
-            if "late" not in _event_captured and current_time >= 28.0:
-                snapshots[f"t=28s — {status_text}"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+            if "late" not in _event_captured and current_time >= config.LATE_SNAPSHOT_TIME:
+                snapshots[f"t={current_time:.1f}s — {status_text}"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
                 _event_captured.add("late")
         else:
             for label, target_sec in capture_times.items():

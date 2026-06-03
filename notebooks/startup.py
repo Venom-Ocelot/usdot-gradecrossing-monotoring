@@ -40,7 +40,9 @@ from pipeline.runner import run_pipeline, PipelineResult
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-get_ipython().run_line_magic("matplotlib", "inline")  # noqa: F821
+_ip = get_ipython()  # noqa: F821
+if _ip is not None:
+    _ip.run_line_magic("matplotlib", "inline")
 
 print(f"OpenCV : {cv2.__version__}")
 print(f"NumPy  : {np.__version__}")

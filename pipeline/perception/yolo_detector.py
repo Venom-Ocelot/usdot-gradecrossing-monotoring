@@ -5,13 +5,21 @@ YOLO detection utilities — model inference and ZOI overlap checking.
 import cv2
 import numpy as np
 
+from .. import config
+
 
 def run_detection(model, frame: np.ndarray) -> list:
     """Run YOLO tracking on a single frame.
 
     Returns the raw Ultralytics results list.
     """
-    return model.track(frame, persist=True, tracker="bytetrack.yaml", verbose=False)
+    return model.track(
+        frame,
+        persist=True,
+        tracker="bytetrack.yaml",
+        verbose=False,
+        conf=config.YOLO_CONF,
+    )
 
 
 def check_vehicle_in_zoi(
@@ -29,6 +37,8 @@ def check_vehicle_in_zoi(
     exclusion_mask = np.zeros(frame_shape[:2], dtype=np.uint8)
 
     for result in yolo_results:
+        if result.boxes is None:
+            continue
         for box in result.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             cv2.rectangle(exclusion_mask, (x1, y1), (x2, y2), 255, -1)
