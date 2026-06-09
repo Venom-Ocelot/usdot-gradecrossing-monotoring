@@ -1,5 +1,4 @@
 *.mov
-*.mp4
 .DS_Store
 .ipynb_checkpoints/
-
+.venv
