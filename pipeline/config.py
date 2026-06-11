@@ -6,19 +6,8 @@ Import this module and override individual values before passing to runner.run_p
 
 import cv2
 
-# ── Video / Model inputs ────────────────────────────────────────────────────
-VIDEO_PATH  = "data/cache/crossing_001.mp4"
-MODEL_PATH  = "weights/best.pt"
-RUN_LABEL   = "crossing_run"
-
-# ── Zone of Interest ────────────────────────────────────────────────────────
-# Four corners of the ZOI polygon with pixel coordinates
-ZOI_POINTS = [
-    [100,  400],  # Top Left
-    [500,  350],  # Top Right
-    [1650, 480],  # Bottom Right
-    [1500, 600],  # Bottom Left
-]
+# ── Model weights ──────────────────────────────────────────────────────────
+MODEL_PATH = "weights/best.pt"
 
 # ── Optical flow (Lucas-Kanade) ─────────────────────────────────────────────
 FEATURE_PARAMS = dict(
@@ -40,9 +29,8 @@ MOG2_VAR_THRESHOLD = 50    # sensitivity — higher = less sensitive
 MOG2_DETECT_SHADOWS = True
 
 # ── Safety thresholds ───────────────────────────────────────────────────────
-AREA_THRESHOLD    = 5000  # minimum debris pixel area to start the debris timer
-TIME_THRESHOLD    = 3.0   # seconds debris must persist before ALARM
-VEHICLE_THRESHOLD = 3.0   # seconds a vehicle must stay in ZOI before ALARM
+AREA_THRESHOLD = 5000  # minimum debris pixel area to start the debris timer
+# vehicle_threshold and time_threshold are set per-video in data/manifests/videos.yaml
 
 # ── Detection stride & confidence ─────────────────────────────────────────
 YOLO_STRIDE = 5     # run YOLO every N frames

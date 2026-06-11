@@ -25,10 +25,11 @@ import yaml
 @dataclass
 class VideoEntry:
     id: str
-    name: str
-    source_type: str       # "local" | "google_drive" | "onedrive"
-    source: str            # local path or remote URL
-    local_cache_path: str  # where the cached copy lives under data/cache/
+    source_type: str                        # "local" | "google_drive" | "onedrive"
+    source: str                             # local path or remote URL
+    local_cache_path: str                   # where the cached copy lives under data/cache/
+    vehicle_threshold: float  # seconds vehicle must dwell in ZOI before ALARM
+    time_threshold: float     # seconds debris must persist before ALARM
 
 
 @dataclass
@@ -43,7 +44,6 @@ class RunPaths:
     metrics_json: Path
     run_metadata_json: Path
     config_used_yaml: Path
-    logs_dir: Path
     debug_frames_dir: Path
 
 
@@ -139,10 +139,8 @@ def create_run(video_id: str, base_dir: str | Path = "outputs/runs") -> RunPaths
     run_id = f"{video_id}_{timestamp}"
     run_dir = Path(base_dir) / run_id
 
-    logs_dir        = run_dir / "logs"
     debug_frames_dir = run_dir / "debug_frames"
 
-    logs_dir.mkdir(parents=True, exist_ok=True)
     debug_frames_dir.mkdir(parents=True, exist_ok=True)
 
     return RunPaths(
@@ -154,7 +152,6 @@ def create_run(video_id: str, base_dir: str | Path = "outputs/runs") -> RunPaths
         metrics_json=run_dir / "metrics.json",
         run_metadata_json=run_dir / "run_metadata.json",
         config_used_yaml=run_dir / "config_used.yaml",
-        logs_dir=logs_dir,
         debug_frames_dir=debug_frames_dir,
     )
 
@@ -236,3 +233,14 @@ def save_run_results(
                 cv2.imwrite(str(out_path), cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR))
         except Exception:
             pass  # debug frames are best-effort; never block a run
+
+    # debug_frames/ — save debris mask at each event moment for diagnostics
+    if result.debris_snapshots:
+        try:
+            import cv2
+            for label, mask in result.debris_snapshots.items():
+                safe_label = label.replace(" ", "_").replace("/", "-").replace(":", "")
+                out_path = run_paths.debug_frames_dir / f"{safe_label}_debris.png"
+                cv2.imwrite(str(out_path), mask)
+        except Exception:
+            pass  # best-effort; never block a run

@@ -16,7 +16,7 @@ from ultralytics import YOLO
 from . import config
 from .io import RunPaths
 from .zoi import detect_feature_points, stabilize_zoi, build_zoi_mask
-from .perception import train_mog2, apply_mog2_mask, check_vehicle_in_zoi, get_debris_mask, run_detection
+from .perception import train_mog2, apply_mog2_mask, check_vehicle_in_zoi, get_debris_mask, run_detection, VehicleTracker
 from .safety_logic import evaluate_status
 from .visualization import draw_frame
 
@@ -30,6 +30,7 @@ class PipelineResult:
     confidence_log: list[tuple]                # (time, class_name, confidence)
     status_log: list[tuple]                    # (time, status_text)
     snapshots: dict[str, np.ndarray]           # label → RGB image
+    debris_snapshots: dict[str, np.ndarray]    # label → grayscale debris mask
 
     @property
     def status_counts(self) -> Counter:
@@ -40,10 +41,10 @@ def run_pipeline(
     video_path: str,
     model: YOLO,
     zoi_points: np.ndarray,
-    run_label: str = config.RUN_LABEL,
+    run_label: str = "",
     area_threshold: int = config.AREA_THRESHOLD,
-    time_threshold: float = config.TIME_THRESHOLD,
-    vehicle_threshold: float = config.VEHICLE_THRESHOLD,
+    time_threshold: float = 3.0,
+    vehicle_threshold: float = 3.0,
     yolo_stride: int = config.YOLO_STRIDE,
     capture_times: dict[str, float] | None = None,
     run_paths: RunPaths | None = None,
@@ -99,9 +100,9 @@ def run_pipeline(
         )
 
     # ── State ───────────────────────────────────────────────────────────────
-    debris_timer_start  = None
-    vehicle_timer_start = None
-    frame_count         = 0
+    debris_timer_start = None
+    vehicle_tracker    = VehicleTracker()
+    frame_count        = 0
 
     yolo_results   = []
     vehicle_in_zoi = False
@@ -110,7 +111,8 @@ def run_pipeline(
     alarm_first_triggered = None
     confidence_log: list[tuple] = []
     status_log:     list[tuple] = []
-    snapshots:      dict        = {}
+    snapshots:        dict = {}
+    debris_snapshots: dict = {}
     _event_captured: set        = set()
 
     # ── Main loop ───────────────────────────────────────────────────────────
@@ -136,9 +138,10 @@ def run_pipeline(
         # YOLO detection (every yolo_stride frames)
         if frame_count % yolo_stride == 0:
             yolo_results = run_detection(model, frame)
-            vehicle_in_zoi, exclusion_mask = check_vehicle_in_zoi(
+            vehicle_in_zoi, active_ids, exclusion_mask = check_vehicle_in_zoi(
                 yolo_results, zoi_mask_full, frame.shape
             )
+            vehicle_tracker.update(active_ids, current_time)
             for result in yolo_results:
                 if result.boxes is not None:
                     for box in result.boxes:
@@ -155,18 +158,12 @@ def run_pipeline(
         debris_mask  = get_debris_mask(fg_mask, exclusion_mask, zoi_mask_full)
         debris_count = cv2.countNonZero(debris_mask)
 
-        # Vehicle dwell timer
-        if vehicle_in_zoi:
-            if vehicle_timer_start is None:
-                vehicle_timer_start = current_time
-            vehicle_time = current_time - vehicle_timer_start
-            # Safety latch: once any alarm has been triggered, clamp dwell time
-            # so a tracker reset cannot downgrade ALARM → WARNING.
-            if alarm_first_triggered is not None:
-                vehicle_time = max(vehicle_time, vehicle_threshold)
-        else:
-            vehicle_timer_start = None
-            vehicle_time = 0.0
+        # Vehicle dwell timer — per ByteTrack ID via VehicleTracker
+        vehicle_time = vehicle_tracker.max_dwell(current_time)
+        # Safety latch: once any alarm has been triggered, clamp dwell time
+        # so an ID switch or tracker reset cannot downgrade ALARM → WARNING.
+        if alarm_first_triggered is not None:
+            vehicle_time = max(vehicle_time, vehicle_threshold)
 
         # Debris persistence timer
         if debris_count >= area_threshold:
@@ -203,22 +200,31 @@ def run_pipeline(
         # Snapshot capture
         if _use_event_capture:
             if "initial" not in _event_captured and frame_count == 1:
-                snapshots["t=0s — CLEAR"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                key = "t=0s — CLEAR"
+                snapshots[key]        = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                debris_snapshots[key] = debris_mask.copy()
                 _event_captured.add("initial")
             if "warning" not in _event_captured and status_text == "WARNING":
-                snapshots[f"t={current_time:.1f}s — WARNING (vehicle in ZOI)"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                key = f"t={current_time:.1f}s — WARNING (vehicle in ZOI)"
+                snapshots[key]        = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                debris_snapshots[key] = debris_mask.copy()
                 _event_captured.add("warning")
             if "alarm" not in _event_captured and status_text == "ALARM":
-                snapshots[f"t={current_time:.1f}s — ALARM (threshold crossed)"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                key = f"t={current_time:.1f}s — ALARM (threshold crossed)"
+                snapshots[key]        = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                debris_snapshots[key] = debris_mask.copy()
                 _event_captured.add("alarm")
             if "late" not in _event_captured and current_time >= config.LATE_SNAPSHOT_TIME:
-                snapshots[f"t={current_time:.1f}s — {status_text}"] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                key = f"t={current_time:.1f}s — {status_text}"
+                snapshots[key]        = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                debris_snapshots[key] = debris_mask.copy()
                 _event_captured.add("late")
         else:
             for label, target_sec in capture_times.items():
                 if label not in snapshots:
                     if abs(current_time - target_sec) < (1 / fps) + 0.1:
-                        snapshots[label] = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                        snapshots[label]        = cv2.cvtColor(frame_drawn, cv2.COLOR_BGR2RGB)
+                        debris_snapshots[label] = debris_mask.copy()
 
     cap.release()
     if video_writer is not None:
@@ -231,4 +237,5 @@ def run_pipeline(
         confidence_log=confidence_log,
         status_log=status_log,
         snapshots=snapshots,
+        debris_snapshots=debris_snapshots,
     )

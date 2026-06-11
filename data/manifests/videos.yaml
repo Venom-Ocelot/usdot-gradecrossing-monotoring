@@ -1,6 +1,14 @@
 videos:
-  - id: crossing_001
-    name: Sample railroad crossing video
+  - id: crossing_001_clip01
     source_type: google_drive
     source: https://drive.google.com/file/d/1_nYQuwJe2Kpp-DsxT0TjQs1VG4ZPE7pa/view?usp=drive_link
     local_cache_path: data/cache/crossing_001.mp4
+    vehicle_threshold: 3.0
+    time_threshold: 3.0
+
+  - id: crossing_002_clip07
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1BCxekS89jFaTAEJHZwbbXiOy9p4RSvnM/view?usp=drive_link
+    local_cache_path: data/cache/crossing_002_clip07.mp4
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0   
