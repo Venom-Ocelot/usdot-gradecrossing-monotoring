@@ -33,6 +33,7 @@ source .venv/bin/activate   # macOS/Linux
 **2. Install dependencies:**
 
 ```bash
+pip install --upgrade pip setuptools
 pip install -r requirements-dev.txt
 ```
 
