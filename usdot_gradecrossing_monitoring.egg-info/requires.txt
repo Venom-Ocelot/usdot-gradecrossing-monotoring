@@ -1,0 +1,7 @@
+opencv-python
+numpy
+matplotlib
+ultralytics
+lap>=0.5.12
+pyyaml
+gdown
