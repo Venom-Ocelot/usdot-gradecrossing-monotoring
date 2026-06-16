@@ -1,4 +1,13 @@
+# Video manifest — register every video here before running the pipeline.
+#
+# vehicle_threshold: seconds a vehicle must sit inside the crossing zone before ALARM triggers.
+#                    Lower this for short clips or fast traffic. Default starting point: 1.5
+#
+# time_threshold:    seconds unknown debris must remain inside the crossing zone before ALARM triggers.
+#                    Lower this if debris is being missed. Default starting point: 2.0
+
 videos:
+<<<<<<< HEAD
   - id: clip08
     source_type: google_drive
     source: https://drive.google.com/file/d/10NsQx-HzuKHhBwjGGRAj-p_0vl0JZ77B/view?usp=drive_link
@@ -6,10 +15,72 @@ videos:
     vehicle_threshold: 0.5
     time_threshold: 1.0
 
+=======
+  - id: clip01
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1_nYQuwJe2Kpp-DsxT0TjQs1VG4ZPE7pa/view?usp=drive_link
+    local_cache_path: data/cache/crossing_001_clip01.mp4
+    vehicle_threshold: 3.0
+    time_threshold: 3.0
+>>>>>>> ca5ca4eaabbcd1288b139f5962e37b425ca6db3a
 
-  - id: crossing_002_clip07
+  - id: clip02
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1QjUpPtTlo4JULkwIQwt_kwChzXtD13w6/view?usp=drive_link
+    local_cache_path: data/cache/clip02.mp4
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0
+
+  - id: clip03
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1lydj16TbAD_YTZKiEEwcqJzgeMNEBQ7s/view?usp=drive_link
+    local_cache_path: data/cache/clip03.mp4
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0
+
+  - id: clip04
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1xSXX1g1l3fKfU2aPxIf6u-UkhSP9RBdH/view?usp=drive_link
+    local_cache_path: data/cache/clip04.mp4
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0
+
+  - id: clip05
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1MCkgaAlxMLA34v5IpxCvLGJodiTE-TbK/view?usp=drive_link
+    local_cache_path: data/cache/clip05.mp4
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0
+
+  - id: clip06
+    source_type: google_drive
+    source: https://drive.google.com/file/d/1PaVMWmF-VbnOthMO7c3Og6np0-Ay9uH2/view?usp=drive_link
+    local_cache_path: data/cache/crossing_003_clip06.mp4
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0
+
+  - id: clip07
     source_type: google_drive
     source: https://drive.google.com/file/d/1BCxekS89jFaTAEJHZwbbXiOy9p4RSvnM/view?usp=drive_link
     local_cache_path: data/cache/crossing_002_clip07.mp4
+<<<<<<< HEAD
     vehicle_threshold: 2.0  
     time_threshold: 2.0
+=======
+    vehicle_threshold: 1.5  
+    time_threshold: 2.0   
+
+  - id: clip08
+    source_type: google_drive
+    source: https://drive.google.com/file/d/10NsQx-HzuKHhBwjGGRAj-p_0vl0JZ77B/view?usp=drive_link
+    local_cache_path: data/cache/clip08.mp4
+    vehicle_threshold: 0.5  
+    time_threshold: 1.0
+
+
+
+
+
+
+
+>>>>>>> ca5ca4eaabbcd1288b139f5962e37b425ca6db3a
