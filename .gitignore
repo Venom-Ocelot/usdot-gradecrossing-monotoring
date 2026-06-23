@@ -2,3 +2,11 @@
 .DS_Store
 .ipynb_checkpoints/
 .venv
+
+# Local virtualenv and Python cache
+.myvenv/
+__pycache__/
+*.pyc
+
+# Large media / demo data (kept on the Releases tab, not in git)
+bgs_playground/myData/

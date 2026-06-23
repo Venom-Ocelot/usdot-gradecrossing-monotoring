@@ -2,6 +2,9 @@
 # This script demonstrates the usage of the pybgs library for background subtraction in a video.
 # It processes a video file, extracts the moving objects by applying the FrameDifference algorithm,
 # and displays the original video, the foreground mask, and the background model in real-time.
+#
+
+
 
 # Import necessary libraries
 import numpy as np
@@ -10,9 +13,20 @@ import pybgs as bgs
 #algorithm = bgs.FrameDifference()
 # Initialize the background subtraction algorithm
 algorithm = bgs.SuBSENSE()
-#video_file = "/home/gaelm/Desktop/Chuprov_Lab_Stuff/pythonbgs/stress_test/Rail-Grade-Crossing-StressTest.mp4"
-video_file = "dataset/video03.avi"
+video_file = "/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/myData/clip_01.mov"
 
+# Configure the blob detector once (re-creating it every frame is wasteful)
+params = cv2.SimpleBlobDetector_Params()
+params.filterByColor = True
+params.blobColor = 255          # foreground mask is white blobs on black
+params.filterByArea = True      # enable so minArea is actually applied
+params.minArea= 100   # toy around with these values.
+#params.maxArea = some large value ?? wonder if i can do this more testing will be done
+params.filterByCircularity = False
+params.filterByConvexity = False
+params.filterByInertia = False  # corrected spelling (was filterByIntertia)
+
+detector = cv2.SimpleBlobDetector_create(params)
 
 # Create a video capture object to read the video file
 capture = cv2.VideoCapture(video_file)
@@ -39,8 +53,7 @@ while True:
   # If a frame was successfully read
   if flag:
     # Display the original video frame
-    cv2.imshow('Original Video', frame)
-    
+    #cv2.imshow('Original Video', frame)
     # Apply the background subtraction algorithm
     img_output = algorithm.apply(frame)
     # Retrieve the current background model
@@ -48,7 +61,21 @@ while True:
 
     # Display the foreground mask and the background model
     cv2.imshow('Foreground Mask', img_output)
-    cv2.imshow('Background Model', img_bgmodel)
+    #cv2.imshow('Background Model', img_bgmodel)
+
+    # Run blob detection on the foreground mask (not the video path)
+    mask = img_output
+    if mask.ndim == 3:
+      mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+
+    keypoints = detector.detect(mask)
+
+    # Draw detected blobs on the original frame so they're easy to see
+    vid_with_keypoints = cv2.drawKeypoints(
+        frame, keypoints, np.array([]), (0, 0, 255),
+        cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv2.imshow('Blob Detection', vid_with_keypoints)
+
   else:
     # Wait for a bit and exit the loop if no frame is captured
     cv2.waitKey(1000)

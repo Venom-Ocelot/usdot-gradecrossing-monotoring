@@ -8,11 +8,7 @@ if __name__ == '__main__' :
     # Set up tracker.
     # Instead of MIL, you can also use
 
-<<<<<<< HEAD
     tracker_types = ['BOOSTING', 'IML','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'CSRT']
-=======
-    tracker_types = ['BOOSTING', 'MIL','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'CSRT']
->>>>>>> e8dd214951c306fc2606e63dac9a15677b378d81
     tracker_type = tracker_types[2]
 
     if int(minor_ver) < 3:
@@ -91,16 +87,7 @@ if __name__ == '__main__' :
         # Display result
         cv2.imshow("Tracking", frame)
 
-<<<<<<< HEAD
         # Pause for 1 millisecond and check for the ESC key (27)
         k = cv2.waitKey(1) & 0xff
         if k == 27: 
             break
-=======
-        # Exit if ESC pressed
-        k = cv2.waitKey(1) & 0xff
-        if k == 27 : break
-
-        video.release()
-        cv2.destroyAllWindows()
->>>>>>> e8dd214951c306fc2606e63dac9a15677b378d81
