@@ -147,9 +147,9 @@ def analyze_video(video_path, min_area=None, max_area=None, display=True,
     capture = cv2.VideoCapture(video_path)
     if not capture.isOpened():
         raise ValueError(f"Could not open video file: {video_path}")
-
-    algorithm = bgs.SuBSENSE()
-
+    #uncomment either or to try algorithms
+    #algorithm = bgs.SuBSENSE()
+    #algorithm = bgs.ViBe()
     writer = None
     if output_path:
         out_dir = os.path.dirname(os.path.abspath(output_path))
