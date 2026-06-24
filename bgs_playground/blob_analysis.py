@@ -17,6 +17,7 @@ subtractor produced it; the demo below wires them to the SuBSENSE subtractor
 from ``playground.py``.
 """
 
+import os
 from dataclasses import dataclass
 
 import cv2
@@ -63,7 +64,7 @@ def clean_mask(mask, open_ksize=3, close_ksize=7):
     return binary
 
 
-def detect_blobs(mask, min_area=100, max_area=None, clean=True):
+def detect_blobs(mask, min_area=None, max_area=None, clean=True):
     """Extract blobs from a binary foreground mask.
 
     Args:
@@ -127,12 +128,19 @@ def draw_blobs(frame, blobs):
     return frame
 
 
-def analyze_video(video_path, min_area=400, max_area=None, display=True):
+def analyze_video(video_path, min_area=None, max_area=None, display=True,
+                  output_path=None):
     """Run BGS + blob analysis over a video.
 
     Uses the SuBSENSE subtractor from ``playground.py``. The core blob
     functions are subtractor-agnostic, so swapping ``algorithm`` for another
     ``pybgs`` method is a one-line change.
+
+    Args:
+        output_path: if given, write the annotated frames to this path (any
+                     directory you choose — parent folders are created if
+                     missing). Blobs are drawn whether or not ``display`` is
+                     True, so the saved video always carries the annotations.
 
     Press Esc to quit when ``display`` is True.
     """
@@ -142,6 +150,18 @@ def analyze_video(video_path, min_area=400, max_area=None, display=True):
 
     algorithm = bgs.SuBSENSE()
 
+    writer = None
+    if output_path:
+        out_dir = os.path.dirname(os.path.abspath(output_path))
+        os.makedirs(out_dir, exist_ok=True)
+        fps = capture.get(cv2.CAP_PROP_FPS) or 30.0
+        width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        if not writer.isOpened():
+            raise ValueError(f"Could not open video writer for: {output_path}")
+
     while True:
         ok, frame = capture.read()
         if not ok:
@@ -150,8 +170,12 @@ def analyze_video(video_path, min_area=400, max_area=None, display=True):
         fg_mask = algorithm.apply(frame)
         blobs, cleaned = detect_blobs(fg_mask, min_area=min_area, max_area=max_area)
 
+        draw_blobs(frame, blobs)
+
+        if writer is not None:
+            writer.write(frame)
+
         if display:
-            draw_blobs(frame, blobs)
             cv2.imshow("Blob Analysis", frame)
             cv2.imshow("Foreground (cleaned)", cleaned)
             if cv2.waitKey(10) & 0xFF == 27:
@@ -159,12 +183,17 @@ def analyze_video(video_path, min_area=400, max_area=None, display=True):
                 break
 
     capture.release()
+    if writer is not None:
+        writer.release()
+        print(f"Saved annotated video to: {output_path}")
     cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
     analyze_video(
         "/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/myData/clip_08.mp4",
-        min_area=400,
+        min_area=3900,
+        max_area=7800,
         display=True,
+        output_path="/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/SuBSENSEBGS_output/clip_08_annotated.mp4",
     )
