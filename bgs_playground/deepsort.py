@@ -37,6 +37,12 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 from blob_analysis import detect_blobs
 
 
+def alarm_state(detections):
+    if not detections:
+        return "clear"
+    else:
+        return "alarm"
+
 def blobs_to_detections(blobs, confidence=1.0, det_class="object"):
     """Convert ``Blob`` objects into DeepSORT detection tuples.
 
@@ -141,6 +147,8 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
     algorithm = bgs.SuBSENSE()
     tracker = build_tracker(max_age=max_age, n_init=n_init)
 
+
+    '''Below is the logic to save the videos into folders for review'''
     writer = None
     mask_writer = None
     if output_path:
@@ -164,6 +172,7 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
         mask_writer = cv2.VideoWriter(mask_output_path, fourcc, fps, (width, height))
         if not mask_writer.isOpened():
             raise ValueError(f"Could not open video writer for: {mask_output_path}")
+    '''directory logic ends here'''
 
     while True:
         ok, frame = capture.read()
@@ -173,7 +182,7 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
         fg_mask = algorithm.apply(frame)
         blobs, cleaned = detect_blobs(fg_mask, min_area=min_area, max_area=max_area)
         detections = blobs_to_detections(blobs)
-
+        status=alarm_state(detections)
         # update_tracks needs the frame so the embedder can crop each detection.
         tracks = tracker.update_tracks(detections, frame=frame)
         draw_tracks(frame, tracks)
@@ -188,6 +197,7 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
         if display:
             cv2.imshow("DeepSORT", frame)
             cv2.imshow("Foreground (cleaned)", cleaned)
+            print("Alarm Status: ",status)
             if cv2.waitKey(10) & 0xFF == 27:
                 print("Exiting...")
                 break
