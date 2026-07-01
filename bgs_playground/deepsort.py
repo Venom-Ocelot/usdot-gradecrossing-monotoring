@@ -182,10 +182,17 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
         fg_mask = algorithm.apply(frame)
         blobs, cleaned = detect_blobs(fg_mask, min_area=min_area, max_area=max_area)
         detections = blobs_to_detections(blobs)
-        status=alarm_state(detections)
+        status = alarm_state(detections)
         # update_tracks needs the frame so the embedder can crop each detection.
         tracks = tracker.update_tracks(detections, frame=frame)
         draw_tracks(frame, tracks)
+
+        # Overlay the alarm status on the frame: red when alarming, green when
+        # clear. Drawn after draw_tracks so it sits on top, and before write/
+        # imshow so it lands in both the saved video and the live window.
+        status_color = (0, 0, 255) if status == "alarm" else (0, 255, 0)
+        cv2.putText(frame, f"Alarm Status: {status.upper()}", (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2, cv2.LINE_AA)
 
         if writer is not None:
             writer.write(frame)
