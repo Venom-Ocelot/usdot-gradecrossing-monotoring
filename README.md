@@ -6,7 +6,7 @@
 This branch includes work done for the following pipeline:
 
 
-![[pipeline_flow_chart.png]]
+![Alternative text](misc/Classical_CV_pipeline_flow_chart-updated.png)
 
 # Completed Work:
 
