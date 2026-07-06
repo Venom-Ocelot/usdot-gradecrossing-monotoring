@@ -37,11 +37,12 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 from blob_analysis import detect_blobs
 
 
-def alarm_state(detections):
-    if not detections:
-        return "clear"
+def alarm_state(tracks):
+    for track in tracks:
+            if track.is_confirmed() and track.time_since_update > 15:
+                return "ALARM"
     else:
-        return "alarm"
+        return "CLEAR"
 
 def blobs_to_detections(blobs, confidence=1.0, det_class="object"):
     """Convert ``Blob`` objects into DeepSORT detection tuples.
@@ -93,7 +94,7 @@ def build_tracker(max_age=30, n_init=3, max_cosine_distance=0.2,
                     the package — no runtime download).
         use_gpu:    run the embedder on CUDA. False = CPU (set up here for the
                     torch-cpu install). ``half`` precision only helps on GPU.
-    """
+    """ 
     return DeepSort(
         max_age=max_age,
         n_init=n_init,
@@ -146,7 +147,7 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
 
     algorithm = bgs.SuBSENSE()
     tracker = build_tracker(max_age=max_age, n_init=n_init)
-
+    
 
     '''Below is the logic to save the videos into folders for review'''
     writer = None
@@ -178,19 +179,19 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
         ok, frame = capture.read()
         if not ok:
             break
-
+        
         fg_mask = algorithm.apply(frame)
         blobs, cleaned = detect_blobs(fg_mask, min_area=min_area, max_area=max_area)
         detections = blobs_to_detections(blobs)
-        status = alarm_state(detections)
         # update_tracks needs the frame so the embedder can crop each detection.
         tracks = tracker.update_tracks(detections, frame=frame)
+        status = alarm_state(tracks)
         draw_tracks(frame, tracks)
-
+        
         # Overlay the alarm status on the frame: red when alarming, green when
         # clear. Drawn after draw_tracks so it sits on top, and before write/
         # imshow so it lands in both the saved video and the live window.
-        status_color = (0, 0, 255) if status == "alarm" else (0, 255, 0)
+        status_color = (0, 0, 255) if status == "ALARM" else (0, 255, 0)
         cv2.putText(frame, f"Alarm Status: {status.upper()}", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, status_color, 2, cv2.LINE_AA)
 
@@ -204,7 +205,8 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
         if display:
             cv2.imshow("DeepSORT", frame)
             cv2.imshow("Foreground (cleaned)", cleaned)
-            print("Alarm Status: ",status)
+            #print("Alarm Status: ",status)
+            print(fps)
             if cv2.waitKey(10) & 0xFF == 27:
                 print("Exiting...")
                 break
@@ -223,9 +225,10 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
 
 if __name__ == "__main__":
     track_video(
-        "/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/myData/clip_08.mp4",
+        "/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/myData/clip_02.mp4",
         min_area=3900,
         max_area=7800,
         display=True,
-        output_path="/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/SuBSENSE_track_output/clip_08_tracked.mp4",
+        output_path="/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/test_alarm/clip_02_tracked.mp4",
+        max_age=100,
     )
