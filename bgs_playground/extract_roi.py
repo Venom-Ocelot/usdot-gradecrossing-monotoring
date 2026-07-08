@@ -8,16 +8,16 @@ object detection, tracking, or enter/exit counting.
 
 Usage:
     # Derive ROI from the rail segmentation model by scanning a video:
-    python training/extract_roi.py \
-        --video /path/to/video \
-        --rail-model /output/rail_seg_all_rails \
-        --output-dir /output/roi
+    python 
+/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/extract_roi.py   
 
-    # Or use a manual polygon and just render a preview over the first frame:
-    python extract_roi.py \
-        --video /path/to/video \
-        --zone-json my_zone.json \
-        --output-dir /output/roi_still_img
+--video /home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/myData/clip_03.mp4    
+
+--rail-model /home/gaelmarquez/usdot-gradecrossing-monotoring/output/rail_seg_all_rails   
+
+--output-dir /home/gaelmarquez/usdot-gradecrossing-monotoring/output/rail_seg_all_rails/roi4 --annotate-video
+
+Note* Without '--annotate-video' it will only output one frame of the entire video
 
     # Add --annotate-video to render the ROI over every frame.
 """
