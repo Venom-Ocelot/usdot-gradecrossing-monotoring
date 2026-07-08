@@ -26,7 +26,7 @@ This branch includes work done for the following pipeline:
 
 # Future Work:
 
-- Looking to implement and finalize the  ROI approach.​
-
+- Looking to implement and finalize the  ROI approach.​ 
+#### _infer_seg_lines.py_ and _train_rail_seg.py_ were generously provided by University Transportation Center for Railway Safety (UTCRS) @ UTRGV
 - Implement the safety logic feature. ​    
 - Get some preliminary evaluation metrics when safety feature gets implemented.​
