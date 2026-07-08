@@ -18,6 +18,7 @@ Usage:
 --output-dir /home/gaelmarquez/usdot-gradecrossing-monotoring/output/rail_seg_all_rails/roi4 --annotate-video
 
 Note* Without '--annotate-video' it will only output one frame of the entire video
+Note* also works on image inputs (so far .jpg work)
 
     # Add --annotate-video to render the ROI over every frame.
 """
