@@ -30,11 +30,16 @@ _BGS_BUILD = "/home/gaelmarquez/bgslibrary/build_py"
 if os.path.isdir(_BGS_BUILD) and _BGS_BUILD not in sys.path:
     sys.path.insert(0, _BGS_BUILD)
 
+
 import cv2
 import pybgs as bgs
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 from blob_analysis import detect_blobs
+from extract_roi import * 
+
+
+
 
 
 def alarm_state(tracks):
@@ -222,11 +227,21 @@ def track_video(video_path, min_area=1, max_area=None, display=True,
     return tracker
 
 
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--video","-v", required=True,type=Path, help="Input video path")
+    parser.add_argument("--zone-json","--zj" ,type=Path,help="Input JSON file path")
+    parser.add_argument("--rail-model","-r",type=Path, help="Give seg model path")
+    parser.add_argument("--output","-o",type=Path,help="Give path to output directory")
+    parser.add_argument("--min-area",type=int,help="give minimum pixel area")
+    parser.add_argument("--max-area",type=int,help="give maximum pixel area")
+    parser.add_argument("--dwell-frames",type=int,help="give dwell frames")
+    parser.add_argument("--display",action="store_true")
+
+    args=parser.parse_args()
+    return args
+
 if __name__ == "__main__":
-    track_video(
-        "/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/myData/clip_08.mp4",
-        min_area=3900,
-        max_area=7800,
-        display=True,
-        output_path="/home/gaelmarquez/usdot-gradecrossing-monotoring/bgs_playground/SuBSENSE_track_output/clip_08_tracked.mp4",
-    )
+    print(parse_args())
