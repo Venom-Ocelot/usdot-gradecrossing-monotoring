@@ -40,7 +40,22 @@ from extract_roi import *
 
 
 
-
+def poly_shape(args):
+    if args.zone_json:
+        zone = load_zone_json(args.zone_json)
+        zone_metadata = {"source": "zone_json", "path": str(args.zone_json)}
+        print(zone.shape)
+    elif args.rail_model:
+        zone, zone_metadata = detect_zone_from_rail_model(
+            args.rail_model,
+            args.video,
+            args.rail_threshold,
+            args.scan_step,
+            args.scan_limit,
+        )
+        print(zone.shape)
+    else:
+        raise SystemExit("Provide either --rail-model or --zone-json.")
 
 def alarm_state(tracks):
     for track in tracks:
@@ -239,9 +254,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-area",type=int,help="give maximum pixel area")
     parser.add_argument("--dwell-frames",type=int,help="give dwell frames")
     parser.add_argument("--display",action="store_true")
+    parser.add_argument("--rail-threshold", type=float, default=0.35)
+    parser.add_argument("--scan-step", type=int, default=30)
+    parser.add_argument("--scan-limit", type=int, default=900)
 
     args=parser.parse_args()
     return args
 
 if __name__ == "__main__":
-    print(parse_args())
+    args=parse_args()
+    print(args)
+    poly_shape(args)
