@@ -60,10 +60,32 @@ if __name__ == "__main__":
 ```
 
 
-- [ ] **2. Get a polygon into PL.** Wire ER dual-source (`--zone-json` ->
+- [DONE] **2. Get a polygon into PL.** Wire ER dual-source (`--zone-json` ->
       `load_zone_json`; `--rail-model` -> `detect_zone_from_rail_model`) into one
       `zone` numpy array. Print its shape.
+```python
+def poly_shape(args):
+    if args.zone_json:
+        zone = load_zone_json(args.zone_json)
+        zone_metadata = {"source": "zone_json", "path": str(args.zone_json)}
+        print(zone.shape)
+    elif args.rail_model:
+        zone, zone_metadata = detect_zone_from_rail_model(
+            args.rail_model,
+            args.video,
+            args.rail_threshold,
+            args.scan_step,
+            args.scan_limit,
+        )
+        print(zone.shape)
+    else:
+        raise SystemExit("Provide either --rail-model or --zone-json.")
 
+  #added to arguments
+    parser.add_argument("--rail-threshold", type=float, default=0.35)
+    parser.add_argument("--scan-step", type=int, default=30)
+    parser.add_argument("--scan-limit", type=int, default=900)
+```
 
 
 - [ ] **3. Overlay the ROI.** In the loop, `frame = draw_zone_overlay(frame,
