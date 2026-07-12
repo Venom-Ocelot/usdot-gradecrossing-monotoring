@@ -85,14 +85,13 @@ def poly_shape(args):
     parser.add_argument("--rail-threshold", type=float, default=0.35)
     parser.add_argument("--scan-step", type=int, default=30)
     parser.add_argument("--scan-limit", type=int, default=900)
-
-    #tested both approches with 
-    ```bash
+```
+#### Both approaches were tested with the following commands
+``` bash
     python3 pipeline.py --video foo.mp4 --zj /path/to/json
     python3 pipeline.py --video /path/to/video --rail-model /path/to/seg_model
-
-    ```
 ```
+
 
 
 - [ ] **3. Overlay the ROI.** In the loop, `frame = draw_zone_overlay(frame,
