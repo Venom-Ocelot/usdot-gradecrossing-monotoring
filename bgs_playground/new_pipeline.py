@@ -389,7 +389,7 @@ def run(args: argparse.Namespace) -> None:
             args.video, zone, args.output_dir / "roi_annotated.mp4", fps, width, height
         )
 
-
+#fix this for sure
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--video", required=True, type=Path, help="Input video path.")
